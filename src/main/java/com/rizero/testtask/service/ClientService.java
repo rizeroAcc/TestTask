@@ -47,7 +47,7 @@ public class ClientService {
         if (newClientInfo.getGender() != null) { clientEntity.setGender(newClientInfo.getGender()); }
         if (newClientInfo.getStatus() != null) { clientEntity.setStatus(newClientInfo.getStatus()); }
         return Optional.of(
-                Client.fromEntity(clientRepository.save(clientEntity))
+                Client.fromEntity(clientRepository.saveAndFlush(clientEntity))
         );
     }
 
