@@ -1,12 +1,10 @@
 package com.rizero.testtask.service;
 
-import com.rizero.testtask.dto.ClientDTO;
-import com.rizero.testtask.dto.CreateClientAccountRequestDTO;
-import com.rizero.testtask.dto.UpdateClientAccountRequestDTO;
 import com.rizero.testtask.entity.ClientEntity;
 import com.rizero.testtask.model.Client;
+import com.rizero.testtask.model.ClientInfo;
+import com.rizero.testtask.model.ClientRegistrationInfo;
 import com.rizero.testtask.repository.ClientRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,12 +13,16 @@ import java.util.Optional;
 
 @Service
 public class ClientService {
-    @Autowired
-    private ClientRepository clientRepository;
-    public Client createUserAccount(CreateClientAccountRequestDTO requestDTO){
+    private final ClientRepository clientRepository;
+
+    public ClientService(ClientRepository clientRepository) {
+        this.clientRepository = clientRepository;
+    }
+
+    public Client createUserAccount(ClientRegistrationInfo clientRegistrationInfo){
         ClientEntity newClient = new ClientEntity();
-        newClient.setFullName(requestDTO.fullName());
-        newClient.setGender(requestDTO.gender());
+        newClient.setFullName(clientRegistrationInfo.getFullName());
+        newClient.setGender(clientRegistrationInfo.getGender());
         newClient.setStatus("ACTIVE");
         newClient = clientRepository.save(newClient);
         return Client.fromEntity(newClient);
@@ -36,14 +38,14 @@ public class ClientService {
     }
 
     @Transactional
-    public Optional<Client> updateUserAccount(Long id, UpdateClientAccountRequestDTO requestDTO) {
+    public Optional<Client> updateUserAccount(Long id, ClientInfo newClientInfo) {
         var client = clientRepository.findById(id);
         if (client.isEmpty()) return Optional.empty();
 
         var clientEntity = client.get();
-        if (requestDTO.fullName() != null) { clientEntity.setFullName(requestDTO.fullName()); }
-        if (requestDTO.gender() != null) { clientEntity.setGender(requestDTO.gender()); }
-        if (requestDTO.status() != null) { clientEntity.setStatus(requestDTO.status()); }
+        if (newClientInfo.getFullName() != null) { clientEntity.setFullName(newClientInfo.getFullName()); }
+        if (newClientInfo.getGender() != null) { clientEntity.setGender(newClientInfo.getGender()); }
+        if (newClientInfo.getStatus() != null) { clientEntity.setStatus(newClientInfo.getStatus()); }
         return Optional.of(
                 Client.fromEntity(clientRepository.save(clientEntity))
         );

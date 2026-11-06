@@ -4,9 +4,10 @@ import com.rizero.testtask.dto.CreateClientAccountRequestDTO;
 import com.rizero.testtask.dto.ClientDTO;
 import com.rizero.testtask.dto.UpdateClientAccountRequestDTO;
 import com.rizero.testtask.model.Client;
+import com.rizero.testtask.model.ClientInfo;
+import com.rizero.testtask.model.ClientRegistrationInfo;
 import com.rizero.testtask.service.ClientService;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
@@ -18,11 +19,17 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/api")
 public class ClientAccountController {
-    @Autowired
-    private ClientService clientService;
+    private final ClientService clientService;
+
+    public ClientAccountController(ClientService clientService) {
+        this.clientService = clientService;
+    }
+
     @PostMapping("/clients")
     public ClientDTO createClientAccount(@RequestBody @Valid CreateClientAccountRequestDTO createClientAccountRequestDTO) {
-        return clientService.createUserAccount(createClientAccountRequestDTO).toDTO();
+        return clientService.createUserAccount(
+                ClientRegistrationInfo.fromRequestDTO(createClientAccountRequestDTO)
+        ).toDTO();
     }
     @GetMapping("/clients")
     public List<ClientDTO> getAllClients() {
@@ -39,7 +46,7 @@ public class ClientAccountController {
     }
     @PutMapping("/clients/{id}")
     public ClientDTO updateClientAccount(@RequestBody @Valid UpdateClientAccountRequestDTO clientDTO, @PathVariable Long id) {
-        Optional<Client> result = clientService.updateUserAccount(id,clientDTO);
+        Optional<Client> result = clientService.updateUserAccount(id, ClientInfo.fromRequestDTO(clientDTO));
         if (result.isPresent()){
             return result.get().toDTO();
         }else {
